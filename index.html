@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS416 Project</title>
+    <!-- Include D3 library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Include your custom JavaScript file -->
+    <script src="script.js" defer>
+    </script>
+</head>
+<style>
+    circle {
+        fill: lightblue;
+        stroke: black;
+    }
+</style>
+<body onload='init()'>
+    <h1>CS416 Project</h1>
+    <svg width=300 height=300>
+    </svg>
+    <script>
+        async function init() {
+            var x = d3.scaleLog([10, 150], [0, 200]);
+            var y = d3.scaleLog([150, 10], [0, 200]);
+            const data = await d3.csv('https://flunky.github.io/cars2017.csv');
+            d3.select("svg").append("g").attr("transform", "translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cx", function (d, i) { return x(Number(d.AverageCityMPG)) }).attr("cy", function (d, i) { return y(Number(d.AverageHighwayMPG)) }).attr("r", function (d, i) { return (Number(d.EngineCylinders) + 2) });
+            d3.select("svg").append("g").attr("transform", "translate(50,50)").call(d3.axisLeft(y).tickValues([10, 20, 50, 100]).tickFormat(d3.format("~s")));
+            d3.select("svg").append("g").attr("transform", "translate(50,250)").call(d3.axisBottom(x).tickValues([10, 20, 50, 100]).tickFormat(d3.format("~s")));
+        }
+    </script>
+</body>
+
+</html>
