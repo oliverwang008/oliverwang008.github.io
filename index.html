@@ -84,23 +84,6 @@
         // Scene 2: Scatter Plot
         const svg2 = d3.select('#scene2 svg');
 
-        const data2 = [
-            { x: 10, y: 20 },
-            { x: 30, y: 40 },
-            { x: 50, y: 60 },
-            { x: 70, y: 80 },
-            { x: 90, y: 100 }
-        ];
-
-        svg2.selectAll('circle')
-            .data(data2)
-            .enter()
-            .append('circle')
-            .attr('cx', d => d.x)
-            .attr('cy', d => d.y)
-            .attr('r', 5)
-            .attr('fill', 'green');
-
         // Scene 3: Line Chart
         const svg3 = d3.select('#scene3 svg');
 
@@ -115,22 +98,15 @@
                 d3.select(`#scene${sceneIndex}`)
                     .classed('active', true);
                 loadSceneOne();
-            } else if (sceneIndex == 3){
+            } else if (sceneIndex == 2){
                 d3.select(`#scene${sceneIndex}`)
                     .classed('active', true);
-                init();
+                loadSceneTwo();
             } else {
                 d3.select(`#scene${sceneIndex}`)
                     .classed('active', true);
+                loadSceneThree();
             }
-        }
-        async function init() {
-            var x = d3.scaleLog([10, 150], [0, 200]);
-            var y = d3.scaleLog([150, 10], [0, 200]);
-            const data = await d3.csv('https://flunky.github.io/cars2017.csv');
-            svg3.append("g").attr("transform", "translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cx", function (d, i) { return x(Number(d.AverageCityMPG)) }).attr("cy", function (d, i) { return y(Number(d.AverageHighwayMPG)) }).attr("r", function (d, i) { return (Number(d.EngineCylinders) + 2) });
-            svg3.append("g").attr("transform", "translate(50,50)").call(d3.axisLeft(y).tickValues([10, 20, 50, 100]).tickFormat(d3.format("~s")));
-            svg3.append("g").attr("transform", "translate(50,250)").call(d3.axisBottom(x).tickValues([10, 20, 50, 100]).tickFormat(d3.format("~s")));
         }
 
         async function loadSceneOne() {
@@ -177,6 +153,101 @@
                 .attr("stroke", "steelblue")
                 .attr("stroke-width", 2)
                 .attr("d", line);
+        }
+
+        async function loadSceneTwo() {
+
+            const data = await d3.csv('https://oliverwang008.github.io/country_life_gdp.csv');
+            const margin = { top: 10, right: 10, bottom: 10, left: 80 };
+            const width = 400 - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            // Append SVG to the chart div
+            svg2.append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // X scale
+            const x = d3.scaleLinear()
+                .domain([70, d3.max(data, d => d.life)])
+                .range([0, width]);
+
+            // Y scale
+            const y = d3.scaleBand()
+                .domain(data.map(d => d.country))
+                .range([0, height])
+                .padding(0.1);
+
+            // Draw bars
+            svg2.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", margin.left)
+                .attr("y", d => y(d.country))
+                .attr("width", d => x(d.life))
+                .attr("height", y.bandwidth());
+
+            // Add X axis
+            svg2.append("g")
+                .attr("transform", `translate(${margin.left},${height})`)
+                .call(d3.axisBottom(x));
+
+            // Add Y axis
+            svg2.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+        }
+
+        async function loadSceneThree() {
+
+            // Append SVG to the chart div
+            svg3.append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // X scale
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.life)])
+                .nice()
+                .range([0, width]);
+
+            // Y scale
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.gdp)])
+                .nice()
+                .range([height, 0]);
+
+            // Draw dots
+            svg3.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(d.life))
+                .attr("cy", d => y(d.gdp))
+                .attr("r", 5);
+
+            // Add labels
+            svg3.selectAll(".dot-label")
+                .data(data)
+                .enter().append("text")
+                .attr("class", "dot-label")
+                .attr("x", d => x(d.life))
+                .attr("y", d => y(d.gdp) - 10) // Adjust label position
+                .text(d => d.country);
+
+            // Add X axis
+            svg3.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            // Add Y axis
+            svg3.append("g")
+                .call(d3.axisLeft(y));
         }
 
     </script>
