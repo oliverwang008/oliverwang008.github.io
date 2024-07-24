@@ -52,19 +52,19 @@
     <!-- Scene 1: Bar Chart -->
     <div class="scene active" id="scene1">
         <h2>EU Life Expectancy Time Series</h2>
-        <svg width="400" height="300"></svg>
+        <svg width="800" height="500"></svg>
     </div>
 
     <!-- Scene 2: Scatter Plot -->
     <div class="scene" id="scene2">
         <h2>Life Expectancy by EU Countries</h2>
-        <svg width="400" height="300"></svg>
+        <svg width="800" height="500"></svg>
     </div>
 
     <!-- Scene 3: Line Chart -->
     <div class="scene" id="scene3">
         <h2>Life Expectancy vs GDP</h2>
-        <svg width="400" height="300"></svg>
+        <svg width="800" height="500"></svg>
     </div>
 
     <!-- Index Buttons -->
@@ -113,8 +113,8 @@
 
             const data = await d3.csv('https://oliverwang008.github.io/eu_life.csv');
             const margin = { top: 10, right: 20, bottom: 10, left: 20 };
-            const width = 400 - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+            const width = 800 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
 
             // Append the SVG object to the chart div
             svg1.append("svg")
@@ -159,8 +159,8 @@
 
             const data = await d3.csv('https://oliverwang008.github.io/country_life_gdp.csv');
             const margin = { top: 10, right: 10, bottom: 10, left: 80 };
-            const width = 400 - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+            const width = 800 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
 
             // Append SVG to the chart div
             svg2.append("svg")
@@ -203,6 +203,11 @@
 
         async function loadSceneThree() {
 
+            const data = await d3.csv('https://oliverwang008.github.io/country_life_gdp.csv');
+            const margin = { top: 10, right: 20, bottom: 10, left: 45 };
+            const width = 800 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+    
             // Append SVG to the chart div
             svg3.append("svg")
                 .attr("width", width + margin.left + margin.right)
@@ -212,15 +217,15 @@
 
             // X scale
             const x = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.life)])
+                .domain([72, d3.max(data, d => d.life)])
                 .nice()
                 .range([0, width]);
 
             // Y scale
             const y = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.gdp)])
+                .domain([10000, d3.max(data, d => d.gdp)])
                 .nice()
-                .range([height, 0]);
+                .range([height-margin.top, margin.top]);
 
             // Draw dots
             svg3.selectAll(".dot")
@@ -237,17 +242,18 @@
                 .enter().append("text")
                 .attr("class", "dot-label")
                 .attr("x", d => x(d.life))
-                .attr("y", d => y(d.gdp) - 10) // Adjust label position
+                .attr("y", d => y(d.gdp) - 5) // Adjust label position
                 .text(d => d.country);
 
             // Add X axis
             svg3.append("g")
-                .attr("transform", `translate(0,${height})`)
+                .attr("transform", `translate(${margin.left},${height})`)
                 .call(d3.axisBottom(x));
 
             // Add Y axis
             svg3.append("g")
-                .call(d3.axisLeft(y));
+                .attr("transform", `translate(${margin.left},${margin.top})`)
+                .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
         }
 
     </script>
