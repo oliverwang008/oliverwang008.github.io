@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js Line Chart with Annotations Example</title> <!-- Load D3.js library -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+    <style>
+        /* Optional CSS for styling */
+        .chart {
+            width: 80%;
+            margin: auto;
+        }
+
+        .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 2px;
+        }
+
+        .annotation text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            fill: #333;
+        }
+
+        .annotation circle {
+            fill: steelblue;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chart"></div>
+
+    <script>
+        // JavaScript code using D3.js will go here
+        // Sample data (replace with your own dataset)
+            const data = [
+                { year: 2010, value: 10 },
+                { year: 2011, value: 20 },
+                { year: 2012, value: 15 },
+                { year: 2013, value: 25 },
+                { year: 2014, value: 30 }
+            ];
+
+            // Sample annotations (replace with your own annotations)
+            const annotations = [
+                { year: 2011, label: "Annotation 1", note: "Description of Annotation 1" },
+                { year: 2013, label: "Annotation 2", note: "Description of Annotation 2" }
+            ];
+
+            // Set up dimensions and margins for the chart
+            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+            const width = 800 - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+
+            // Append SVG to the chart div
+            const svg = d3.select(".chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // X scale
+            const x = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.year))
+                .range([0, width]);
+
+            // Y scale
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value)])
+                .nice()
+                .range([height, 0]);
+
+            // Draw line
+            const line = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.value));
+
+            svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line);
+
+            // Add annotations
+            const makeAnnotations = d3.annotation()
+                .type(d3.annotationLabel)
+                .annotations(annotations.map(d => ({
+                    type: d3.annotationLabel,
+                    x: x(d.year),
+                    y: y(d.value),
+                    dx: 30,
+                    dy: -30,
+                    note: { label: d.label, title: d.note }
+                })));
+
+            svg.append("g")
+                .attr("class", "annotations")
+                .call(makeAnnotations);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+    </script>
+</body>
+
+</html>
