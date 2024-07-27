@@ -76,51 +76,44 @@
 
 <body>
 
-    <!-- Scene 1: Home -->
-    <div class="scene active" id="scene_home">
+    <!-- Scene 1: Bar Chart -->
+    <div class="scene active" id="scene1">
         <h2>EU Life Expectancy Time Series</h2>
         <svg width="800" height="500"></svg>
     </div>
 
-    <!-- Scene 2: Europe -->
-    <div class="scene" id="scene_eu">
+    <!-- Scene 2: Scatter Plot -->
+    <div class="scene" id="scene2">
         <h2>Life Expectancy by EU Countries</h2>
         <svg width="800" height="500"></svg>
         <div class="tooltip" style="opacity: 0;"></div>
     </div>
 
-    <!-- Scene 3: North America -->
-    <div class="scene" id="scene_na">
+    <!-- Scene 3: Line Chart -->
+    <div class="scene" id="scene3">
         <h2>Life Expectancy vs GDP</h2>
         <svg width="800" height="500"></svg>
     </div>
 
-    <!-- Scene 4: East Asia & Pacific -->
-    <div class="scene" id="scene_ap">
-        <h2>Life Expectancy vs GDP</h2>
-        <svg width="800" height="500"></svg>
-    </div>
-
-    <!-- Home Buttons -->
+    <!-- Index Buttons -->
     <div class="button-container">
-        <button onclick="load_home()">Home</button>
+        <button onclick="showScene(1)">Scene 1</button>
+        <button onclick="showScene(2)">Scene 2</button>
+        <button onclick="showScene(3)">Scene 3</button>
     </div>
 
     <script>
         // D3.js code for each scene
 
-        // Scene 1: Main Chart
-        const svg_home = d3.select('#scene_home svg');
-        load_home();
+        // Scene 1: Bar Chart
+        const svg1 = d3.select('#scene1 svg');
+        loadSceneOne();
 
-        // Scene 2: Europe
-        const svg_eu = d3.select('#scene_eu svg');
+        // Scene 2: Scatter Plot
+        const svg2 = d3.select('#scene2 svg');
 
-        // Scene 3: North America
-        const svg_na = d3.select('#scene_na svg');
-
-        // Scene 4: East Asia & Pacific
-        const svg_ap = d3.select('#scene_ap svg');
+        // Scene 3: Line Chart
+        const svg3 = d3.select('#scene3 svg');
 
         // Function to switch scenes
         function showScene(sceneIndex) {
@@ -144,15 +137,15 @@
             }
         }
 
-        async function load_home() {
+        async function loadSceneOne() {
 
-            const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
+            const data = await d3.csv('https://oliverwang008.github.io/eu_life.csv');
             const margin = { top: 10, right: 20, bottom: 10, left: 20 };
             const width = 800 - margin.left - margin.right;
             const height = 500 - margin.top - margin.bottom;
 
             // Append the SVG object to the chart div
-            svg_home.append("svg")
+            svg1.append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
@@ -164,53 +157,31 @@
                 .domain([d3.min(data, d => d.year), d3.max(data, d => d.year)])
                 .range([margin.left, width]);
 
-            svg_home.append("g")
+            svg1.append("g")
                 .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
             // Y scale and axis
             const y = d3.scaleLinear()
-                .domain([60, 85])
+                .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)])
                 .range([height, 0]);
 
-            svg_home.append("g")
+            svg1.append("g")
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
 
             // Line function
-            const line_eu = d3.line()
+            const line = d3.line()
                 .x(d => x(d.year))
-                .y(d => y(d.europe));
-
-            const line_na = d3.line()
-                .x(d => x(d.year))
-                .y(d => y(d.north_america));
-
-            const line_ap = d3.line()
-                .x(d => x(d.year))
-                .y(d => y(d.east_asia_pacific));
+                .y(d => y(d.value));
 
             // Draw the line
-            svg_home.append("path")
+            svg1.append("path")
                 .datum(data)
                 .attr("fill", "none")
                 .attr("stroke", "steelblue")
                 .attr("stroke-width", 2)
-                .attr("d", line_eu);
-
-            svg_home.append("path")
-                .datum(data)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
-                .attr("d", line_na);
-
-            svg_home.append("path")
-                .datum(data)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
-                .attr("d", line_ap);
+                .attr("d", line);
 
             const type = d3.annotationCalloutCircle
 
