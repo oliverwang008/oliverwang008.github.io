@@ -165,29 +165,55 @@
                 .attr("stroke-width", 2)
                 .attr("d", line);
 
-            const type = d3.annotationLabel
+            const type = d3.annotationCalloutCircle
 
-            const annotations = [{
+            const annotations = [
+            {
                 note: {
-                    label: "Longer text to show text wrapping",
-                    bgPadding: 20,
-                    title: "Annotations :)"
+                    label: "COVID-19 Global Pandemic",
+                    title: "Early 2020s"
                 },
                 //can use x, y directly instead of data
                 data: { year: 2020, value: 80.45086913 },
-                className: "show-bg",
-                dy: 0,
+                dy: 60,
+                dx: -10
+            },
+            {
+                note: {
+                    label: "HIV/AIDS Crisis",
+                    title: "Early 2000s"
+                },
+                //can use x, y directly instead of data
+                data: { year: 2002, value: 77.5310033 },
+                dy: 30,
                 dx: 0
+            },
+            {
+                    note: {
+                        label: "Soviet Union Transition",
+                        title: "Late 1980s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 1989, value: 74.65464948 },
+                    dy: -30,
+                    dx: -20
+            },
+            {
+                    note: {
+                        label: "Post-War Economic Transistions",
+                        title: "Late 1960s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 1969, value: 70.72180243 },
+                    dy: -30,
+                    dx: 20
             }]
 
-            const parseTime = d3.timeParse("%d-%b-%y")
-            const timeFormat = d3.timeFormat("%d-%b-%y")
-
             const makeAnnotations = d3.annotation()
-                .editMode(true)
+                //.editMode(true)
                 //also can set and override in the note.padding property
                 //of the annotation object
-                .notePadding(15)
+                .notePadding(10)
                 .type(type)
                 //accessors & accessorsInverse not needed
                 //if using x, y in annotations JSON
@@ -195,14 +221,10 @@
                     x: d => x(d.year),
                     y: d => y(d.value)
                 })
-                .accessorsInverse({
-                    date: d => x.invert(d.x),
-                    close: d => y.invert(d.y)
-                })
                 .annotations(annotations)
 
             svg1.append("g")
-                .attr("class", "annotation-group")
+                //.attr("class", "annotation-group")
                 .call(makeAnnotations)
         }
 
