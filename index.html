@@ -54,16 +54,6 @@
             stroke: #fff;
             stroke-width: 2px;
         }
-        .tooltip {
-            position: absolute;
-            text-align: left;
-            padding: 5px;
-            font-size: 12px;
-            background: lightgray;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            pointer-events: none;
-        }
         .label {
             font-size: 12px;
             fill: black;
@@ -77,7 +67,7 @@
             stroke-width: 5px;
             cursor: pointer;
         }
-        .tooltip_home {
+        .tooltip_overview {
             position: absolute;
             text-align: left;
             padding: 5px;
@@ -123,63 +113,73 @@
 <body>
 
     <!-- Scene 1: Home -->
-    <div class="scene active" id="scene_home">
+    <div class="scene active" id="scene_overview">
         <h2>Overview of Life Expectancy 1980-2022 by World Regions</h2>
         <svg width="800" height="500"></svg>
-        <div class="tooltip_home" style="opacity: 0;"></div>
+        <div class="tooltip_overview" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 2: Europe -->
-    <div class="scene" id="scene_eu">
+    <div class="scene" id="scene_europe">
         <h2>Life Expectancy 1980-2022 in Europe</h2>
         <svg width="800" height="500"></svg>
         <div class="tooltip_eu" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 3: North America -->
-    <div class="scene" id="scene_na">
+    <div class="scene" id="scene_north_america">
         <h2>Life Expectancy 1980-2022 in North America</h2>
         <svg width="800" height="500"></svg>
         <div class="tooltip_na" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 4: East Asia & Pacific -->
-    <div class="scene" id="scene_ap">
+    <div class="scene" id="scene_east_asia_pacific">
         <h2>Life Expectancy 1980-2022 in East Asia & Pacific</h2>
         <svg width="800" height="500"></svg>
         <div class="tooltip_ap" style="opacity: 0;"></div>
     </div>
 
-    <!-- Home Buttons -->
+    <!-- Overview Button -->
     <div class="button-container">
-        <button onclick="click_home_button()">Go to Overview</button>
+        <button onclick="show_scene('overview')">Go to Overview</button>
     </div>
 
     <script>
         // D3.js code for each scene
 
-        // Scene 1: Main Chart
-        const svg_home = d3.select('#scene_home svg');
-        load_scene_home();
+        // Scene 1: Overview Chart
+        const svg_overview = d3.select('#scene_overview svg');
+        load_scene_overview();
 
         // Scene 2: Europe
-        const svg_eu = d3.select('#scene_eu svg');
+        const svg_eu = d3.select('#scene_europe svg');
 
         // Scene 3: North America
-        const svg_na = d3.select('#scene_na svg');
+        const svg_na = d3.select('#scene_north_america svg');
 
         // Scene 4: East Asia & Pacific
-        const svg_ap = d3.select('#scene_ap svg');
+        const svg_ap = d3.select('#scene_east_asia_pacific svg');
 
-        function click_home_button(){
+        // Function to switch scenes using region as parameter
+        function show_scene(region){
             d3.selectAll('.scene')
                 .classed('active', false);
-            d3.select('#scene_home')
+            d3.select(`#scene_${region}`)
                 .classed('active', true);
-            load_scene_home()
+
+            if (region == "overview") {
+                load_scene_overview();
+            } else if (region == "europe") {
+                load_scene_eu();
+            } else if (region == "north_america") {
+                load_scene_na();
+            } else if (region == "east_asia_pacific") {
+                load_scene_ap();
+            }
         }
 
-        async function load_scene_home() {
+        async function load_scene_overview() {
 
             const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
             const margin = { top: 10, right: 20, bottom: 10, left: 20 };
@@ -187,7 +187,7 @@
             const height = 500 - margin.top - margin.bottom;
 
             // Append the SVG object to the chart div
-            svg_home.append("svg")
+            svg_overview.append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
@@ -195,11 +195,10 @@
 
             // X scale and axis
             const x = d3.scaleLinear()
-                //.domain(d3.extent(data, d => d.year))
                 .domain([1980, 2024])
                 .range([margin.left, width]);
 
-            svg_home.append("g")
+            svg_overview.append("g")
                 .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
@@ -208,7 +207,7 @@
                 .domain([64, 83])
                 .range([height, 0]);
 
-            svg_home.append("g")
+            svg_overview.append("g")
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
 
@@ -226,7 +225,7 @@
                 .y(d => y(d.east_asia_pacific));
 
             // Draw the line
-            svg_home.append("path")
+            svg_overview.append("path")
                 .datum(data)
                 .attr('class', 'line')
                 .attr("fill", "none")
@@ -234,25 +233,21 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_eu)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_eu')
-                        .classed('active', true);
-                    load_scene_eu()
+                    show_scene('europe');
                 })
                 .on('mouseover', (event, d) => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 1)
                         .html('<strong>Life Expectancy</strong><br><strong>Europe</strong>')
                         .style('left', `${event.pageX + 10}px`)
                         .style('top', `${event.pageY - 28}px`);
                 })
                 .on('mouseout', () => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 0);
                 });
 
-            svg_home.append("path")
+            svg_overview.append("path")
                 .datum(data)
                 .attr('class', 'line')
                 .attr("fill", "none")
@@ -260,25 +255,21 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_na)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_na')
-                        .classed('active', true);
-                    load_scene_na()
+                    show_scene('north_america');
                 })
                 .on('mouseover', (event, d) => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 1)
                         .html('<strong>Life Expectancy</strong><br><strong>North America</strong>')
                         .style('left', `${event.pageX + 10}px`)
                         .style('top', `${event.pageY - 28}px`);
                 })
                 .on('mouseout', () => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 0);
                 });
 
-            svg_home.append("path")
+            svg_overview.append("path")
                 .datum(data)
                 .attr('class', 'line')
                 .attr("fill", "none")
@@ -286,25 +277,21 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_ap)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_ap')
-                        .classed('active', true);
-                    load_scene_ap()
+                    show_scene('east_asia_pacific');
                 })
                 .on('mouseover', (event, d) => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 1)
                         .html('<strong>Life Expectancy</strong><br><strong>East Asia & Pacific</strong>')
                         .style('left', `${event.pageX + 10}px`)
                         .style('top', `${event.pageY - 28}px`);
                 })
                 .on('mouseout', () => {
-                    d3.select('.tooltip_home')
+                    d3.select('.tooltip_overview')
                         .style('opacity', 0);
                 });
             
-            svg_home.append('text')
+            svg_overview.append('text')
                 .attr('class', 'label')
                 .attr('x', x(data[data.length - 1].year))
                 .attr('y', y(data[data.length - 1].north_america))
@@ -312,13 +299,13 @@
                 .attr('text-anchor', 'middle')
                 .text('North America');
             
-            svg_home.append("circle")
+            svg_overview.append("circle")
                 .attr("class", "dot")
                 .attr("cx", d => x(data[data.length - 1].year))
                 .attr("cy", d => y(data[data.length - 1].north_america))
                 .attr("r", 5);
             
-            svg_home.append('text')
+            svg_overview.append('text')
                 .attr('class', 'label')
                 .attr('x', x(data[data.length - 1].year))
                 .attr('y', y(data[data.length - 1].europe))
@@ -326,13 +313,13 @@
                 .attr('text-anchor', 'middle')
                 .text('Europe');
 
-            svg_home.append("circle")
+            svg_overview.append("circle")
                 .attr("class", "dot")
                 .attr("cx", d => x(data[data.length - 1].year))
                 .attr("cy", d => y(data[data.length - 1].europe))
                 .attr("r", 5);
             
-            svg_home.append('text')
+            svg_overview.append('text')
                 .attr('class', 'label')
                 .attr('x', x(data[data.length - 1].year))
                 .attr('y', y(data[data.length - 1].east_asia_pacific))
@@ -340,7 +327,7 @@
                 .attr('text-anchor', 'middle')
                 .text('East Asia & Pacific');
             
-            svg_home.append("circle")
+            svg_overview.append("circle")
                 .attr("class", "dot")
                 .attr("cx", d => x(data[data.length - 1].year))
                 .attr("cy", d => y(data[data.length - 1].east_asia_pacific))
@@ -362,7 +349,6 @@
 
             // X scale and axis
             const x = d3.scaleLinear()
-                //.domain(d3.extent(data, d => d.year))
                 .domain([1980, 2024])
                 .range([margin.left, width]);
 
@@ -401,11 +387,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_na)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_na')
-                        .classed('active', true);
-                    load_scene_na()
+                    show_scene('north_america');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_eu')
@@ -435,11 +417,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_ap)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_ap')
-                        .classed('active', true);
-                    load_scene_ap()
+                    show_scene('east_asia_pacific');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_eu')
@@ -453,7 +431,7 @@
                         .style('opacity', 0);
                 });
 
-            const type = d3.annotationCalloutCircle
+            const type = d3.annotationCalloutCircle;
 
             const annotations = [
                 {
@@ -461,7 +439,6 @@
                         label: "COVID-19 Global Pandemic",
                         title: "Early 2020s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2020, value: 81.49343123 },
                     dy: 10,
                     dx: -20
@@ -471,7 +448,6 @@
                         label: "HIV/AIDS Crisis",
                         title: "Early 2000s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2002, value: 78.63019248 },
                     dy: 30,
                     dx: 0
@@ -481,29 +457,22 @@
                         label: "Soviet Union Transition",
                         title: "Late 1980s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 1990, value: 75.81149745 },
                     dy: -30,
                     dx: -20
-                }]
+                }];
 
             const makeAnnotations = d3.annotation()
-                //.editMode(true)
-                //also can set and override in the note.padding property
-                //of the annotation object
                 .notePadding(10)
                 .type(type)
-                //accessors & accessorsInverse not needed
-                //if using x, y in annotations JSON
                 .accessors({
                     x: d => x(d.year),
                     y: d => y(d.value)
                 })
-                .annotations(annotations)
+                .annotations(annotations);
 
             svg_eu.append("g")
-                //.attr("class", "annotation-group")
-                .call(makeAnnotations)
+                .call(makeAnnotations);
         }
 
         async function load_scene_na() {
@@ -521,7 +490,6 @@
 
             // X scale and axis
             const x = d3.scaleLinear()
-                //.domain(d3.extent(data, d => d.year))
                 .domain([1980, 2024])
                 .range([margin.left, width]);
 
@@ -560,11 +528,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_eu)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_eu')
-                        .classed('active', true);
-                    load_scene_eu()
+                    show_scene('europe');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_na')
@@ -594,11 +558,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_ap)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_ap')
-                        .classed('active', true);
-                    load_scene_ap()
+                    show_scene('east_asia_pacific');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_na')
@@ -612,7 +572,7 @@
                         .style('opacity', 0);
                 });
 
-            const type = d3.annotationCalloutCircle
+            const type = d3.annotationCalloutCircle;
 
             const annotations = [
                 {
@@ -620,7 +580,6 @@
                         label: "AIDS Epidemic and Chronic Diseases",
                         title: "Mid 1980s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 1985, value: 74.73592874 },
                     dy: -50,
                     dx: 0
@@ -630,7 +589,6 @@
                         label: "Economic Recession",
                         title: "Early 1990s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 1993, value: 75.6464215 },
                     dy: 30,
                     dx: 0
@@ -640,7 +598,6 @@
                         label: "Opioid Epidemic Crisis",
                         title: "Mid 2010s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2016, value: 78.87973542 },
                     dy: 30,
                     dx: -20
@@ -650,29 +607,22 @@
                         label: "COVID-19 Global Pandemic",
                         title: "Early 2020s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2021, value: 76.87265827 },
                     dy: 60,
                     dx: -10
-                }]
+                }];
 
             const makeAnnotations = d3.annotation()
-                //.editMode(true)
-                //also can set and override in the note.padding property
-                //of the annotation object
                 .notePadding(10)
                 .type(type)
-                //accessors & accessorsInverse not needed
-                //if using x, y in annotations JSON
                 .accessors({
                     x: d => x(d.year),
                     y: d => y(d.value)
                 })
-                .annotations(annotations)
+                .annotations(annotations);
 
             svg_na.append("g")
-                //.attr("class", "annotation-group")
-                .call(makeAnnotations)
+                .call(makeAnnotations);
             
         }
 
@@ -691,7 +641,6 @@
 
             // X scale and axis
             const x = d3.scaleLinear()
-                //.domain(d3.extent(data, d => d.year))
                 .domain([1980, 2024])
                 .range([margin.left, width]);
 
@@ -730,11 +679,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_eu)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_eu')
-                        .classed('active', true);
-                    load_scene_eu()
+                    show_scene('europe');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_ap')
@@ -746,7 +691,7 @@
                 .on('mouseout', () => {
                     d3.select('.tooltip_ap')
                         .style('opacity', 0);
-                });;
+                });
 
             svg_ap.append("path")
                 .datum(data)
@@ -756,11 +701,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_na)
                 .on('click', function (event) {
-                    d3.selectAll('.scene')
-                        .classed('active', false);
-                    d3.select('#scene_na')
-                        .classed('active', true);
-                    load_scene_na()
+                    show_scene('north_america');
                 })
                 .on('mouseover', (event, d) => {
                     d3.select('.tooltip_ap')
@@ -772,7 +713,7 @@
                 .on('mouseout', () => {
                     d3.select('.tooltip_ap')
                         .style('opacity', 0);
-                });;
+                });
 
             svg_ap.append("path")
                 .datum(data)
@@ -782,7 +723,7 @@
                 .attr("stroke-width", 3)
                 .attr("d", line_ap);
 
-            const type = d3.annotationCalloutCircle
+            const type = d3.annotationCalloutCircle;
 
             const annotations = [
                 {
@@ -790,7 +731,6 @@
                         label: "COVID-19 Global Pandemic",
                         title: "Early 2020s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2021, value: 76.39329502 },
                     dy: 60,
                     dx: -10
@@ -800,7 +740,6 @@
                         label: "SARS Outbreak",
                         title: "Early 2000s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 2003, value: 72.86440322 },
                     dy: 30,
                     dx: 0
@@ -810,30 +749,22 @@
                         label: "HIV/AIDS Epidemic",
                         title: "Late 1990s"
                     },
-                    //can use x, y directly instead of data
                     data: { year: 1998, value: 70.97034433 },
                     dy: -30,
                     dx: -20
-                }]
+                }];
 
             const makeAnnotations = d3.annotation()
-                //.editMode(true)
-                //also can set and override in the note.padding property
-                //of the annotation object
                 .notePadding(10)
                 .type(type)
-                //accessors & accessorsInverse not needed
-                //if using x, y in annotations JSON
                 .accessors({
                     x: d => x(d.year),
                     y: d => y(d.value)
                 })
-                .annotations(annotations)
+                .annotations(annotations);
 
             svg_ap.append("g")
-                //.attr("class", "annotation-group")
-                .call(makeAnnotations)
-
+                .call(makeAnnotations);
         }
 
     </script>
