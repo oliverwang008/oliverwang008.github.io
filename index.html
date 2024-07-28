@@ -42,8 +42,7 @@
             background-color: #0056b3;
         }
         circle {
-            fill: lightblue;
-            stroke: black;
+            fill: black;
         }
         .annotation text {
             font-family: Arial, sans-serif;
@@ -55,12 +54,6 @@
             stroke: #fff;
             stroke-width: 2px;
         }
-        .bar {
-            fill: steelblue;
-        }
-        .bar:hover {
-            fill: orange;
-        }
         .tooltip {
             position: absolute;
             text-align: left;
@@ -71,6 +64,19 @@
             border-radius: 3px;
             pointer-events: none;
         }
+        .label {
+            font-size: 12px;
+            fill: black;
+        }
+        .line {
+            fill: none;
+            stroke-width: 3px;
+        }
+        .line:hover {
+            stroke: orange;
+            stroke-width: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -78,32 +84,32 @@
 
     <!-- Scene 1: Home -->
     <div class="scene active" id="scene_home">
-        <h2>EU Life Expectancy Time Series</h2>
+        <h2>Overview of Life Expectancy 1980-2022 by World Regions</h2>
         <svg width="800" height="500"></svg>
     </div>
 
     <!-- Scene 2: Europe -->
     <div class="scene" id="scene_eu">
-        <h2>Life Expectancy by EU Countries</h2>
+        <h2>Life Expectancy Change in Europe</h2>
         <svg width="800" height="500"></svg>
         <div class="tooltip" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 3: North America -->
     <div class="scene" id="scene_na">
-        <h2>Life Expectancy vs GDP</h2>
+        <h2>Life Expectancy Change in North America</h2>
         <svg width="800" height="500"></svg>
     </div>
 
     <!-- Scene 4: East Asia & Pacific -->
     <div class="scene" id="scene_ap">
-        <h2>Life Expectancy vs GDP</h2>
+        <h2>Life Expectancy Change in East Asia & Pacific</h2>
         <svg width="800" height="500"></svg>
     </div>
 
     <!-- Home Buttons -->
     <div class="button-container">
-        <button onclick="load_home()">Home</button>
+        <button onclick="click_home_button()">Back to Overview</button>
     </div>
 
     <script>
@@ -111,7 +117,7 @@
 
         // Scene 1: Main Chart
         const svg_home = d3.select('#scene_home svg');
-        load_home();
+        load_scene_home();
 
         // Scene 2: Europe
         const svg_eu = d3.select('#scene_eu svg');
@@ -122,29 +128,15 @@
         // Scene 4: East Asia & Pacific
         const svg_ap = d3.select('#scene_ap svg');
 
-        // Function to switch scenes
-        function showScene(sceneIndex) {
-            // Hide all scenes
+        function click_home_button(){
             d3.selectAll('.scene')
                 .classed('active', false);
-
-            // Show the selected scene
-            if (sceneIndex == 1) {
-                d3.select(`#scene${sceneIndex}`)
-                    .classed('active', true);
-                loadSceneOne();
-            } else if (sceneIndex == 2){
-                d3.select(`#scene${sceneIndex}`)
-                    .classed('active', true);
-                loadSceneTwo();
-            } else {
-                d3.select(`#scene${sceneIndex}`)
-                    .classed('active', true);
-                loadSceneThree();
-            }
+            d3.select('#scene_home')
+                .classed('active', true);
+            load_scene_home()
         }
 
-        async function load_home() {
+        async function load_scene_home() {
 
             const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
             const margin = { top: 10, right: 20, bottom: 10, left: 20 };
@@ -161,7 +153,7 @@
             // X scale and axis
             const x = d3.scaleLinear()
                 //.domain(d3.extent(data, d => d.year))
-                .domain([d3.min(data, d => d.year), d3.max(data, d => d.year)])
+                .domain([1980, 2024])
                 .range([margin.left, width]);
 
             svg_home.append("g")
@@ -170,7 +162,7 @@
 
             // Y scale and axis
             const y = d3.scaleLinear()
-                .domain([60, 85])
+                .domain([64, 83])
                 .range([height, 0]);
 
             svg_home.append("g")
@@ -193,68 +185,209 @@
             // Draw the line
             svg_home.append("path")
                 .datum(data)
+                .attr('class', 'line')
                 .attr("fill", "none")
                 .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
+                .attr("stroke-width", 3)
+                .attr("d", line_eu)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_eu')
+                        .classed('active', true);
+                    load_scene_eu()
+                });
+
+            svg_home.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3)
+                .attr("d", line_na)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_na')
+                        .classed('active', true);
+                    load_scene_na()
+                });
+
+            svg_home.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3)
+                .attr("d", line_ap)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_ap')
+                        .classed('active', true);
+                    load_scene_ap()
+                });
+            
+            svg_home.append('text')
+                .attr('class', 'label')
+                .attr('x', x(data[data.length - 1].year))
+                .attr('y', y(data[data.length - 1].north_america))
+                .attr('dy', -10)
+                .attr('text-anchor', 'middle')
+                .text('North America');
+            
+            svg_home.append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(data[data.length - 1].year))
+                .attr("cy", d => y(data[data.length - 1].north_america))
+                .attr("r", 5);
+            
+            svg_home.append('text')
+                .attr('class', 'label')
+                .attr('x', x(data[data.length - 1].year))
+                .attr('y', y(data[data.length - 1].europe))
+                .attr('dy', 20)
+                .attr('text-anchor', 'middle')
+                .text('Europe');
+
+            svg_home.append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(data[data.length - 1].year))
+                .attr("cy", d => y(data[data.length - 1].europe))
+                .attr("r", 5);
+            
+            svg_home.append('text')
+                .attr('class', 'label')
+                .attr('x', x(data[data.length - 1].year))
+                .attr('y', y(data[data.length - 1].east_asia_pacific))
+                .attr('dy', 25)
+                .attr('text-anchor', 'middle')
+                .text('East Asia & Pacific');
+            
+            svg_home.append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(data[data.length - 1].year))
+                .attr("cy", d => y(data[data.length - 1].east_asia_pacific))
+                .attr("r", 5);
+        }
+
+        async function load_scene_eu() {
+            const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
+            const margin = { top: 10, right: 20, bottom: 10, left: 20 };
+            const width = 800 - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+
+            // Append the SVG object to the chart div
+            svg_eu.append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // X scale and axis
+            const x = d3.scaleLinear()
+                //.domain(d3.extent(data, d => d.year))
+                .domain([1980, 2024])
+                .range([margin.left, width]);
+
+            svg_eu.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            // Y scale and axis
+            const y = d3.scaleLinear()
+                .domain([64, 83])
+                .range([height, 0]);
+
+            svg_eu.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
+
+            // Line function
+            const line_eu = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.europe));
+
+            const line_na = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.north_america));
+
+            const line_ap = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.east_asia_pacific));
+
+            // Draw the line
+            svg_eu.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_na)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_na')
+                        .classed('active', true);
+                    load_scene_na()
+                });
+            
+            svg_eu.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3)
                 .attr("d", line_eu);
 
-            svg_home.append("path")
+            svg_eu.append("path")
                 .datum(data)
+                .attr('class', 'line')
                 .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
-                .attr("d", line_na);
-
-            svg_home.append("path")
-                .datum(data)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 2)
-                .attr("d", line_ap);
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_ap)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_ap')
+                        .classed('active', true);
+                    load_scene_ap()
+                });
 
             const type = d3.annotationCalloutCircle
 
             const annotations = [
-            {
-                note: {
-                    label: "COVID-19 Global Pandemic",
-                    title: "Early 2020s"
+                {
+                    note: {
+                        label: "COVID-19 Global Pandemic",
+                        title: "Early 2020s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2020, value: 81.49343123 },
+                    dy: 10,
+                    dx: -20
                 },
-                //can use x, y directly instead of data
-                data: { year: 2020, value: 80.45086913 },
-                dy: 60,
-                dx: -10
-            },
-            {
-                note: {
-                    label: "HIV/AIDS Crisis",
-                    title: "Early 2000s"
+                {
+                    note: {
+                        label: "HIV/AIDS Crisis",
+                        title: "Early 2000s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2002, value: 78.63019248 },
+                    dy: 30,
+                    dx: 0
                 },
-                //can use x, y directly instead of data
-                data: { year: 2002, value: 77.5310033 },
-                dy: 30,
-                dx: 0
-            },
-            {
+                {
                     note: {
                         label: "Soviet Union Transition",
                         title: "Late 1980s"
                     },
                     //can use x, y directly instead of data
-                    data: { year: 1989, value: 74.65464948 },
+                    data: { year: 1990, value: 75.81149745 },
                     dy: -30,
                     dx: -20
-            },
-            {
-                    note: {
-                        label: "Post-War Economic Transistions",
-                        title: "Late 1960s"
-                    },
-                    //can use x, y directly instead of data
-                    data: { year: 1968, value: 70.59593239 },
-                    dy: -80,
-                    dx: 0
-            }]
+                }]
 
             const makeAnnotations = d3.annotation()
                 //.editMode(true)
@@ -270,121 +403,295 @@
                 })
                 .annotations(annotations)
 
-            svg1.append("g")
+            svg_eu.append("g")
                 //.attr("class", "annotation-group")
                 .call(makeAnnotations)
         }
 
-        async function loadSceneTwo() {
-
-            const data = await d3.csv('https://oliverwang008.github.io/country_life_gdp.csv');
-            const margin = { top: 10, right: 10, bottom: 10, left: 80 };
+        async function load_scene_na() {
+            const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
+            const margin = { top: 10, right: 20, bottom: 10, left: 20 };
             const width = 800 - margin.left - margin.right;
             const height = 500 - margin.top - margin.bottom;
 
-            // Append SVG to the chart div
-            svg2.append("svg")
+            // Append the SVG object to the chart div
+            svg_na.append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            // X scale
+            // X scale and axis
             const x = d3.scaleLinear()
-                .domain([70, d3.max(data, d => d.life)])
-                .range([0, width]);
+                //.domain(d3.extent(data, d => d.year))
+                .domain([1980, 2024])
+                .range([margin.left, width]);
 
-            // Y scale
-            const y = d3.scaleBand()
-                .domain(data.map(d => d.country))
-                .range([0, height])
-                .padding(0.1);
+            svg_na.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
 
-            // Draw bars
-            svg2.selectAll(".bar")
-                .data(data)
-                .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", margin.left)
-                .attr("y", d => y(d.country))
-                .attr("width", d => x(d.life))
-                .attr("height", y.bandwidth())
-                .on('mouseover', (event, d) => {
-                    d3.select('.tooltip')
-                        .style('opacity', 1)
-                        .html(`<strong>Country:</strong> ${d.country}<br><strong>Life Expectancy:</strong> ${d.life}`)
-                        .style('left', `${event.pageX + 10}px`)
-                        .style('top', `${event.pageY - 28}px`);
-                })
-                .on('mouseout', () => {
-                    d3.select('.tooltip')
-                        .style('opacity', 0);
+            // Y scale and axis
+            const y = d3.scaleLinear()
+                .domain([64, 83])
+                .range([height, 0]);
+
+            svg_na.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
+
+            // Line function
+            const line_eu = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.europe));
+
+            const line_na = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.north_america));
+
+            const line_ap = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.east_asia_pacific));
+
+            // Draw the line
+            svg_na.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_eu)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_eu')
+                        .classed('active', true);
+                    load_scene_eu()
                 });
 
-            // Add X axis
-            svg2.append("g")
-                .attr("transform", `translate(${margin.left},${height})`)
-                .call(d3.axisBottom(x));
+            svg_na.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3)
+                .attr("d", line_na);
 
-            // Add Y axis
-            svg2.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y));
+            svg_na.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_ap)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_ap')
+                        .classed('active', true);
+                    load_scene_ap()
+                });
+
+            const type = d3.annotationCalloutCircle
+
+            const annotations = [
+                {
+                    note: {
+                        label: "AIDS Epidemic and Chronic Diseases",
+                        title: "Mid 1980s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 1985, value: 74.73592874 },
+                    dy: -50,
+                    dx: 0
+                },
+                {
+                    note: {
+                        label: "Economic Recession",
+                        title: "Early 1990s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 1993, value: 75.6464215 },
+                    dy: 30,
+                    dx: 0
+                },
+                {
+                    note: {
+                        label: "Opioid Epidemic Crisis",
+                        title: "Mid 2010s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2016, value: 78.87973542 },
+                    dy: 30,
+                    dx: -20
+                },
+                {
+                    note: {
+                        label: "COVID-19 Global Pandemic",
+                        title: "Early 2020s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2021, value: 76.87265827 },
+                    dy: 60,
+                    dx: -10
+                }]
+
+            const makeAnnotations = d3.annotation()
+                //.editMode(true)
+                //also can set and override in the note.padding property
+                //of the annotation object
+                .notePadding(10)
+                .type(type)
+                //accessors & accessorsInverse not needed
+                //if using x, y in annotations JSON
+                .accessors({
+                    x: d => x(d.year),
+                    y: d => y(d.value)
+                })
+                .annotations(annotations)
+
+            svg_na.append("g")
+                //.attr("class", "annotation-group")
+                .call(makeAnnotations)
+            
         }
 
-        async function loadSceneThree() {
-
-            const data = await d3.csv('https://oliverwang008.github.io/country_life_gdp.csv');
-            const margin = { top: 10, right: 20, bottom: 10, left: 45 };
+        async function load_scene_ap() {
+            const data = await d3.csv('https://oliverwang008.github.io/global_life.csv');
+            const margin = { top: 10, right: 20, bottom: 10, left: 20 };
             const width = 800 - margin.left - margin.right;
             const height = 500 - margin.top - margin.bottom;
-    
-            // Append SVG to the chart div
-            svg3.append("svg")
+
+            // Append the SVG object to the chart div
+            svg_na.append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            // X scale
+            // X scale and axis
             const x = d3.scaleLinear()
-                .domain([72, d3.max(data, d => d.life)])
-                .nice()
-                .range([0, width]);
+                //.domain(d3.extent(data, d => d.year))
+                .domain([1980, 2024])
+                .range([margin.left, width]);
 
-            // Y scale
-            const y = d3.scaleLinear()
-                .domain([10000, d3.max(data, d => d.gdp)])
-                .nice()
-                .range([height-margin.top, margin.top]);
-
-            // Draw dots
-            svg3.selectAll(".dot")
-                .data(data)
-                .enter().append("circle")
-                .attr("class", "dot")
-                .attr("cx", d => x(d.life))
-                .attr("cy", d => y(d.gdp))
-                .attr("r", 5);
-
-            // Add labels
-            svg3.selectAll(".dot-label")
-                .data(data)
-                .enter().append("text")
-                .attr("class", "dot-label")
-                .attr("x", d => x(d.life))
-                .attr("y", d => y(d.gdp) - 5) // Adjust label position
-                .text(d => d.country);
-
-            // Add X axis
-            svg3.append("g")
-                .attr("transform", `translate(${margin.left},${height})`)
+            svg_ap.append("g")
+                .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
-            // Add Y axis
-            svg3.append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`)
+            // Y scale and axis
+            const y = d3.scaleLinear()
+                .domain([64, 83])
+                .range([height, 0]);
+
+            svg_ap.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(y).tickFormat(d3.format(",.0f")));
+
+            // Line function
+            const line_eu = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.europe));
+
+            const line_na = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.north_america));
+
+            const line_ap = d3.line()
+                .x(d => x(d.year))
+                .y(d => y(d.east_asia_pacific));
+
+            // Draw the line
+            svg_ap.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_eu)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_eu')
+                        .classed('active', true);
+                    load_scene_eu()
+                });
+
+            svg_ap.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "lightgray")
+                .attr("stroke-width", 3)
+                .attr("d", line_na)
+                .on('click', function (event) {
+                    d3.selectAll('.scene')
+                        .classed('active', false);
+                    d3.select('#scene_na')
+                        .classed('active', true);
+                    load_scene_na()
+                });
+
+            svg_ap.append("path")
+                .datum(data)
+                .attr('class', 'line')
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 3)
+                .attr("d", line_ap);
+
+            const type = d3.annotationCalloutCircle
+
+            const annotations = [
+                {
+                    note: {
+                        label: "COVID-19 Global Pandemic",
+                        title: "Early 2020s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2021, value: 76.39329502 },
+                    dy: 60,
+                    dx: -10
+                },
+                {
+                    note: {
+                        label: "SARS Outbreak",
+                        title: "Early 2000s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 2003, value: 72.86440322 },
+                    dy: 30,
+                    dx: 0
+                },
+                {
+                    note: {
+                        label: "HIV/AIDS Epidemic",
+                        title: "Late 1990s"
+                    },
+                    //can use x, y directly instead of data
+                    data: { year: 1998, value: 70.97034433 },
+                    dy: -30,
+                    dx: -20
+                }]
+
+            const makeAnnotations = d3.annotation()
+                //.editMode(true)
+                //also can set and override in the note.padding property
+                //of the annotation object
+                .notePadding(10)
+                .type(type)
+                //accessors & accessorsInverse not needed
+                //if using x, y in annotations JSON
+                .accessors({
+                    x: d => x(d.year),
+                    y: d => y(d.value)
+                })
+                .annotations(annotations)
+
+            svg_ap.append("g")
+                //.attr("class", "annotation-group")
+                .call(makeAnnotations)
+
         }
 
     </script>
