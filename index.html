@@ -77,6 +77,46 @@
             stroke-width: 5px;
             cursor: pointer;
         }
+        .tooltip_home {
+            position: absolute;
+            text-align: left;
+            padding: 5px;
+            font-size: 12px;
+            background: lightgray;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            pointer-events: none;
+        }
+        .tooltip_eu {
+            position: absolute;
+            text-align: left;
+            padding: 5px;
+            font-size: 12px;
+            background: lightgray;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            pointer-events: none;
+        }
+        .tooltip_na {
+            position: absolute;
+            text-align: left;
+            padding: 5px;
+            font-size: 12px;
+            background: lightgray;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            pointer-events: none;
+        }
+        .tooltip_ap {
+            position: absolute;
+            text-align: left;
+            padding: 5px;
+            font-size: 12px;
+            background: lightgray;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -86,30 +126,33 @@
     <div class="scene active" id="scene_home">
         <h2>Overview of Life Expectancy 1980-2022 by World Regions</h2>
         <svg width="800" height="500"></svg>
+        <div class="tooltip_home" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 2: Europe -->
     <div class="scene" id="scene_eu">
-        <h2>Life Expectancy Change in Europe</h2>
+        <h2>Life Expectancy 1980-2022 in Europe</h2>
         <svg width="800" height="500"></svg>
-        <div class="tooltip" style="opacity: 0;"></div>
+        <div class="tooltip_eu" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 3: North America -->
     <div class="scene" id="scene_na">
-        <h2>Life Expectancy Change in North America</h2>
+        <h2>Life Expectancy 1980-2022 in North America</h2>
         <svg width="800" height="500"></svg>
+        <div class="tooltip_na" style="opacity: 0;"></div>
     </div>
 
     <!-- Scene 4: East Asia & Pacific -->
     <div class="scene" id="scene_ap">
-        <h2>Life Expectancy Change in East Asia & Pacific</h2>
+        <h2>Life Expectancy 1980-2022 in East Asia & Pacific</h2>
         <svg width="800" height="500"></svg>
+        <div class="tooltip_ap" style="opacity: 0;"></div>
     </div>
 
     <!-- Home Buttons -->
     <div class="button-container">
-        <button onclick="click_home_button()">Back to Overview</button>
+        <button onclick="click_home_button()">Go to Overview</button>
     </div>
 
     <script>
@@ -196,6 +239,17 @@
                     d3.select('#scene_eu')
                         .classed('active', true);
                     load_scene_eu()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>Europe</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 0);
                 });
 
             svg_home.append("path")
@@ -211,6 +265,17 @@
                     d3.select('#scene_na')
                         .classed('active', true);
                     load_scene_na()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>North America</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 0);
                 });
 
             svg_home.append("path")
@@ -226,6 +291,17 @@
                     d3.select('#scene_ap')
                         .classed('active', true);
                     load_scene_ap()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>East Asia & Pacific</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_home')
+                        .style('opacity', 0);
                 });
             
             svg_home.append('text')
@@ -330,6 +406,17 @@
                     d3.select('#scene_na')
                         .classed('active', true);
                     load_scene_na()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_eu')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>North America</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_eu')
+                        .style('opacity', 0);
                 });
             
             svg_eu.append("path")
@@ -353,6 +440,17 @@
                     d3.select('#scene_ap')
                         .classed('active', true);
                     load_scene_ap()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_eu')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>East Asia & Pacific</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_eu')
+                        .style('opacity', 0);
                 });
 
             const type = d3.annotationCalloutCircle
@@ -467,6 +565,17 @@
                     d3.select('#scene_eu')
                         .classed('active', true);
                     load_scene_eu()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_na')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>Europe</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_na')
+                        .style('opacity', 0);
                 });
 
             svg_na.append("path")
@@ -490,6 +599,17 @@
                     d3.select('#scene_ap')
                         .classed('active', true);
                     load_scene_ap()
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_na')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>East Asia & Pacific</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_na')
+                        .style('opacity', 0);
                 });
 
             const type = d3.annotationCalloutCircle
@@ -615,7 +735,18 @@
                     d3.select('#scene_eu')
                         .classed('active', true);
                     load_scene_eu()
-                });
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_ap')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>Europe</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_ap')
+                        .style('opacity', 0);
+                });;
 
             svg_ap.append("path")
                 .datum(data)
@@ -630,7 +761,18 @@
                     d3.select('#scene_na')
                         .classed('active', true);
                     load_scene_na()
-                });
+                })
+                .on('mouseover', (event, d) => {
+                    d3.select('.tooltip_ap')
+                        .style('opacity', 1)
+                        .html('<strong>Life Expectancy</strong><br><strong>North America</strong>')
+                        .style('left', `${event.pageX + 10}px`)
+                        .style('top', `${event.pageY - 28}px`);
+                })
+                .on('mouseout', () => {
+                    d3.select('.tooltip_ap')
+                        .style('opacity', 0);
+                });;
 
             svg_ap.append("path")
                 .datum(data)
